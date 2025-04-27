@@ -784,5 +784,129 @@ class SecondScreen extends StatelessWidget {
   }
 }
 
+9. currency converter
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const CurrencyConverterApp());
+}
+
+class CurrencyConverterApp extends StatelessWidget {
+  const CurrencyConverterApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Currency Converter',
+      home: const CurrencyConverterHome(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class CurrencyConverterHome extends StatefulWidget {
+  const CurrencyConverterHome({super.key});
+
+  @override
+  State<CurrencyConverterHome> createState() => _CurrencyConverterHomeState();
+}
+
+class _CurrencyConverterHomeState extends State<CurrencyConverterHome> {
+  final TextEditingController _controller = TextEditingController();
+  String _fromCurrency = 'Dollar';
+  String _toCurrency = 'Rupee';
+  String _result = '';
+
+  final Map<String, double> _ratesToUSD = {
+    'Dollar': 1.0,
+    'Rupee': 0.012, // 1 Rupee = 0.012 Dollar approx
+    'Pound': 1.24,  // 1 Pound = 1.24 Dollar approx
+  };
+
+  void _convertCurrency() {
+    double inputAmount = double.tryParse(_controller.text) ?? 0;
+
+    if (inputAmount == 0) {
+      setState(() {
+        _result = 'Enter a valid amount!';
+      });
+      return;
+    }
+
+    double amountInUSD = inputAmount * _ratesToUSD[_fromCurrency]!;
+    double finalAmount = amountInUSD / _ratesToUSD[_toCurrency]!;
+
+    setState(() {
+      _result = '${finalAmount.toStringAsFixed(2)} $_toCurrency';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Currency Converter')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Enter Amount',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(child: _buildDropdown(true)),
+                const SizedBox(width: 20),
+                Expanded(child: _buildDropdown(false)),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _convertCurrency,
+              child: const Text('Convert'),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              _result,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown(bool isFrom) {
+    return DropdownButtonFormField<String>(
+      value: isFrom ? _fromCurrency : _toCurrency,
+      items: _ratesToUSD.keys.map((currency) {
+        return DropdownMenuItem(
+          value: currency,
+          child: Text(currency),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          if (isFrom) {
+            _fromCurrency = value!;
+          } else {
+            _toCurrency = value!;
+          }
+        });
+      },
+      decoration: InputDecoration(
+        labelText: isFrom ? 'From' : 'To',
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+}
 
 link: https://chatgpt.com/share/680eb4de-2878-800a-a860-af61afa603c3
